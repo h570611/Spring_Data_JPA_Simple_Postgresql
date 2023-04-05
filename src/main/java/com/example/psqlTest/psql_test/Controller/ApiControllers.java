@@ -20,28 +20,38 @@ public class ApiControllers {
     private CategoryRepo categoryRepo;
 
 
-    // METADATA -------------------------------------------------------
+// METADATA -------------------------------------------------------
 
     @GetMapping(value = "/")
-    public String getPage(){ return "Welcome to metadata repository!";}
+    public String getPage(){
+
+        return "Welcome to metadata repository!";}
 
     @GetMapping(value = "/metadata")
     public List<Metadata> getMetadata(){
         return metadataRepo.findAll();
     }
 
-    @PostMapping(value = "/metadata/create")
-    public String createMetadata(@RequestBody Metadata metadata){
-        if(metadata.getAlias() != null && metadata.getDescription() != null && metadata.getName() != null &&  metadata.getCategory() != null){
-            metadataRepo.save(metadata);
-            return "Saved..";
-        }else {
-            String errorMsg = "ERROR - ";
-            if(metadata.getCategory() == null){
-                errorMsg += "Category is null";
+    @PostMapping(value = "/metadata/create/{cat_name}")
+    public String createMetadata(@RequestBody Metadata metadata, @PathVariable String cat_name){
+        String output = "";
+
+        if(metadata.getAlias() != null && metadata.getDescription() != null && metadata.getName() != null){
+            long cat_id = getCategoryIdByName(cat_name);
+            boolean category_Exists = (cat_id != -1);
+            if (category_Exists) {
+                Category currentCategory = categoryRepo.findById(cat_id).get();
+                metadata.setCategory(currentCategory);
+                metadataRepo.save(metadata);
+                output = "Saved successfully!";
+            } else {
+                output = "Invalid input: Category does not exist.";
             }
-            return errorMsg;
+
+        }else {
+            output = "Invalid input. One or more parameters missing";
         }
+        return output;
     }
 
     @DeleteMapping(value = "/metadata/delete/{id}")
@@ -59,8 +69,7 @@ public class ApiControllers {
         return "Deleted all metdata rows. Count : " + count;
     }
 
-
-    // CATEGORY -------------------------------------------------------
+// CATEGORY -------------------------------------------------------
 
     @GetMapping(value = "/category")
     public List<Category> getCategories(){
@@ -92,5 +101,18 @@ public class ApiControllers {
         return "Deleted all category rows. Count : " + count;
     }
 
+// HELPER-FUNCTIONS -------------------------------------------------
 
+
+    public long getCategoryIdByName(String categoryName){
+        long id = -1;
+        List<Category> allCategories = categoryRepo.findAll();
+
+        for (Category cat:allCategories) {
+            if (cat.getName().equals(categoryName)){
+                return cat.getId();
+            }
+        }
+        return id;
+    }
 }

@@ -15,16 +15,9 @@ public class Category {
     @Column
     private String name;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "category", cascade = CascadeType.ALL)
-    private Set<Metadata> metadata;
+//    @OneToMany(fetch = FetchType.EAGER, mappedBy = "category", cascade = CascadeType.ALL)
+//    private Set<Metadata> metadata;
 
-    public Set<Metadata> getMetadata() {
-        return metadata;
-    }
-
-    public void setMetadata(Set<Metadata> metadata) {
-        this.metadata = metadata;
-    }
 
     public long getId() {
         return id;
